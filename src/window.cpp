@@ -11,7 +11,7 @@
 double mysquare(double t, double f, unsigned int harmonics)
 {
 	double s = 0.;
-	for (size_t k = 0; k <= harmonics; ++k) {
+	for (size_t k = 1; k <= harmonics+1; ++k) {
 		s += sin(2.*M_PI*(2.*k-1.)*f*t) / (2.*k-1);
 	}
 	s = 4./M_PI * s;
@@ -234,18 +234,20 @@ void Window::displayData()
 
 	size_t start = 0;
 	bool below = false;
-	for (size_t i = 1; !start && i < nosamples; ++i) {
+    for (size_t i = 1; i < this->data.buff_n && i < static_cast<size_t>(nosamples); ++i) {
 		if (this->data.buff[i] > this->data.buff[i-1]) {
 			if (this->data.buff[i] <= trigger) {
 				below = true;
 			}
 			if (below && this->data.buff[i] >= trigger) {
 				start = i;
+				break;
 			}
 		}
 	}
-	for (size_t i = start; i < nosamples; ++i) {
-		QPointF p(i, this->data.buff[i]);
+	for (size_t i = start; i < data.buff_n && i < nosamples+start; ++i) {
+		double t = (i-start)/(double)data.sr * 1e3;
+		QPointF p(t, this->data.buff[i]);
 		*series << p;
 	}
 	chart->removeAllSeries();
